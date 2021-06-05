@@ -30,7 +30,7 @@ class Disk(ABC):
 
     def __init__(self, disk: dict):
         self._device = Path(disk['device'])
-        self._partition = Path(f"{disk['location']}1")
+        self._partition = Path(f"{disk['device']}1")
         self._mount = Path(disk['mount'])
         self._clear = self._bool(disk['clear'])
         self._format = self._get_format(disk['format'])
@@ -43,6 +43,9 @@ class Disk(ABC):
 
         if not self._model:
             self._model = self.set_model()
+
+        if self._partition.exists():
+            self._uuid = self.set_uuid()
 
         self._size = shutil.disk_usage(self._device)
 
@@ -94,7 +97,7 @@ class Disk(ABC):
                 capture_output=True, universal_newlines=True
             )
 
-            line = result.stdout.readline()
+            line = result.stdout
             res = re.search(r'ID_SERIAL_SHORT=(.*)', line)
             if res:
                 sn = res.group(1)
@@ -116,7 +119,7 @@ class Disk(ABC):
                 capture_output=True, universal_newlines=True
             )
 
-            line = result.stdout.readline()
+            line = result.stdout
             res = re.search(r'ID_MODEL=(.*)', line)
             if res:
                 model = res.group(1)

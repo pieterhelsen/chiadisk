@@ -24,7 +24,7 @@ def parse_arguments() -> Tuple[ArgumentParser, Namespace]:
 def init(config: Config):
     logging.basicConfig(
         format="[%(asctime)s] [%(levelname)8s] --- %(message)s (%(filename)s:%(lineno)s)",
-        level=Config.get_log_level(),
+        level=config.get_log_level(),
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
