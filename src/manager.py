@@ -1,7 +1,6 @@
 import csv
 from abc import ABC
 from pathlib import Path
-from typing import List
 
 from src.config import Config
 from src.disk import Disk
@@ -24,10 +23,10 @@ class DiskManager(ABC):
             # mount disk
             self._mounter.mount(disk)
 
-    def _get_disks(self) -> List[Disk]:
+    def _get_disks(self) -> list[Disk]:
         disklist = Path(self._config.get('list'))
-        fp = disklist.open(mode='r', encoding='utf-8', newline='')
-        reader = csv.DictReader(fp, delimiter=';')
+        fp = disklist.open(mode='r', encoding='uft-8')
+        reader = csv.DictReader(fp)
         disks = []
 
         for row in reader:

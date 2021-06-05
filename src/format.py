@@ -29,8 +29,6 @@ class DiskFormatter(ABC):
                 raise DiskError(f"Could not create filesystem ({self._disk.format}) for {disk.partition}")
 
             return True
-        else:
-            logging.debug(f"Skipping format for disk {self._disk.device}")
 
     def _mklabel(self) -> bool:
         try:
@@ -44,7 +42,7 @@ class DiskFormatter(ABC):
 
     def _mkpart(self) -> bool:
         try:
-            subprocess.check_call(['sudo', 'parted', 'mkpart', 'primary', self._disk.format.value, '0%', '100%'])
+            subprocess.check_call(['sudo', 'parted', 'mkpart', 'primary', self._disk.format, '0%', '100%'])
             return True
         except subprocess.CalledProcessError as e:
             logging.error(
