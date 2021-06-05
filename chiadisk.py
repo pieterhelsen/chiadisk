@@ -7,12 +7,13 @@ from typing import Tuple
 
 from src.config import Config
 from src.format import DiskFormatter
+from src.manager import DiskManager
 from src.mount import DiskMounter
 
 
 def parse_arguments() -> Tuple[ArgumentParser, Namespace]:
     parser = argparse.ArgumentParser(
-        description="Chiadisk: Disk formatted and health checker."
+        description="Chiadisk: Disk formatter and health checker."
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--config', type=str, help="path to config.yaml")
@@ -38,6 +39,7 @@ def init(config: Config):
     # Disk Checker - checks disk health
 
     # Disk Manager - ties it all together
+    chiadisk = DiskManager(config, formatter, mounter)
 
 
 def version():
