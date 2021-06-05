@@ -115,3 +115,7 @@ dmypy.json
 
 # IntelliJ IDE
 .idea/
+
+# project files
+config.yaml
+disklist.csv
