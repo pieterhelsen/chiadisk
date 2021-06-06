@@ -14,23 +14,11 @@ class DiskError(Exception):
     pass
 
 
-class DiskFormat(Enum):
-
-    EXT4 = "ext4"
-    FAT32 = "fat32"
-    NTFS = "NTFS"
-
-    @classmethod
-    def has_value(cls, value):
-        values = set(item.value for item in DiskFormat)
-        return value in values
-
-
 class Disk(ABC):
 
     def __init__(self, disk: dict):
         self._device = Path(disk['device'])
-        self._partition = Path(f"{disk['location']}1")
+        self._partition = Path(f"{disk['device']}1")
         self._mount = Path(disk['mount'])
         self._clear = self._bool(disk['clear'])
         self._format = self._get_format(disk['format'])
@@ -44,6 +32,10 @@ class Disk(ABC):
         if not self._model:
             self._model = self.set_model()
 
+        if self._partition.exists():
+            self._uuid = self.set_uuid()
+            logging.debug(f'Partition exists. Set UUID to {self._uuid}')
+
         self._size = shutil.disk_usage(self._device)
 
     @staticmethod
@@ -54,12 +46,11 @@ class Disk(ABC):
         return False
 
     @staticmethod
-    def _get_format(fmt: str) -> DiskFormat:
-        fmt = fmt.upper()
-        if DiskFormat.has_value(fmt):
-            return DiskFormat[fmt]
+    def _get_format(fmt: str) -> str:
+        if fmt in ('ext4', 'ext2', 'ntfs', 'vfat'):
+            return fmt
 
-        return DiskFormat.EXT4
+        return 'ext4'
 
     def set_partition(self, partition_id: int):
         self._partition = f"{self.device}{str(partition_id)}"
@@ -94,8 +85,7 @@ class Disk(ABC):
                 capture_output=True, universal_newlines=True
             )
 
-            line = result.stdout.readline()
-            res = re.search(r'ID_SERIAL_SHORT=(.*)', line)
+            res = re.search(r'ID_SERIAL_SHORT=(.*)', result.stdout)
             if res:
                 sn = res.group(1)
 
@@ -116,8 +106,7 @@ class Disk(ABC):
                 capture_output=True, universal_newlines=True
             )
 
-            line = result.stdout.readline()
-            res = re.search(r'ID_MODEL=(.*)', line)
+            res = re.search(r'ID_MODEL=(.*)', result.stdout)
             if res:
                 model = res.group(1)
 
@@ -146,7 +135,7 @@ class Disk(ABC):
         return self._clear
 
     @property
-    def format(self) -> DiskFormat:
+    def format(self) -> str:
         return self._format
 
     @property
