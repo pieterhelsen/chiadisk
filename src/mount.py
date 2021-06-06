@@ -1,9 +1,9 @@
 import logging
 import subprocess
+import re
 
 from abc import ABC
 from pathlib import Path
-from typing import re
 from hurry.filesize import size
 
 from src.config import Config
@@ -31,9 +31,9 @@ class DiskMounter(ABC):
     def _create_dir(self):
         # create partition folder, including parents
         # skip if the directory exists
-        if not self._disk.partition.exists():
-            self._disk.partition.mkdir(parents=True)
-            logging.debug(f"Creating mount point: {self._disk.partition}")
+        if not self._disk.mount.exists():
+            self._disk.mount.mkdir(parents=True)
+            logging.debug(f"Creating mount point: {self._disk.mount}")
 
     def _update_fstab(self):
         fp = Path("/etc/fstab")
@@ -54,7 +54,7 @@ class DiskMounter(ABC):
 
     def _mount_disk(self) -> bool:
         try:
-            subprocess.check_call(['sudo', 'mount', '-v', self._disk.partition])
+            subprocess.check_call(['sudo', 'mount', '-v', self._disk.mount])
             return True
         except subprocess.CalledProcessError as e:
             logging.error(
@@ -64,15 +64,15 @@ class DiskMounter(ABC):
 
         return False
 
-    def _check_fstab_duplicates(self, fp:Path) -> bool:
+    def _check_fstab_duplicates(self, fp: Path) -> bool:
         txt = fp.read_text(encoding='utf-8')
         res = False
 
-        if re.search(self._disk.mount, txt):
+        if re.search(str(self._disk.mount), txt):
             logging.debug("Found mount point duplicate in /etc/fstab. Skipping...")
             res = True
 
-        if re.search(self._disk.uuid, txt):
+        if re.search(str(self._disk.uuid), txt):
             logging.debug("Found UUID duplicate in /etc/fstab. Skipping...")
             res = True
 
