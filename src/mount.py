@@ -1,10 +1,11 @@
 import logging
+import os
 import subprocess
 import re
 
 from abc import ABC
 from pathlib import Path
-from hurry.filesize import size
+from hurry.filesize import size, alternative
 
 from src.config import Config
 from src.disk import Disk
@@ -39,7 +40,7 @@ class DiskMounter(ABC):
         fp = Path("/etc/fstab")
         has_duplicates = self._check_fstab_duplicates(fp)
         total, used, free = self._disk.size
-        pretty_total = size(total)
+        pretty_total = size(total, system=alternative)
         defaults = "defaults,auto,users,rw,nofail,noatime 0 0"
 
         fstr = (
@@ -49,8 +50,13 @@ class DiskMounter(ABC):
         )
 
         if not has_duplicates:
-            fp.write_text(fstr, encoding="utf-8")
-            logging.debug(f'Updated /etc/fstab for partition {self._disk.partition}')
+            if os.getuid() == 0:
+                fp.write_text(fstr, encoding="utf-8")
+                logging.debug(f'Updated /etc/fstab for partition {self._disk.partition}')
+            else:
+                logging.info('/etc/fstab could not be updated due to permission errors. '
+                             'Please paste the lines below in the /etc/fstab file:')
+                logging.info(fstr)
 
     def _mount_disk(self) -> bool:
         try:

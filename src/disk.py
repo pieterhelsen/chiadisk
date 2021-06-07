@@ -36,7 +36,7 @@ class Disk(ABC):
             self._uuid = self.set_uuid()
             logging.debug(f'Partition exists. Set UUID to {self._uuid}')
 
-        self._size = shutil.disk_usage(self._device)
+        self.set_size()
 
     @staticmethod
     def _bool(clear: str) -> bool:
@@ -117,6 +117,18 @@ class Disk(ABC):
             logging.debug(f"Error: {e.stderr}")
 
         return model
+
+    def set_size(self) -> Tuple[int, int, int]:
+        if self._partition.exists():
+            self._size = shutil.disk_usage(self._partition)
+        else:
+            self._size = shutil.disk_usage(self._device)
+
+        return self._size
+
+    def update(self):
+        self.set_size()
+        self.set_uuid()
 
     @property
     def device(self) -> Path:
