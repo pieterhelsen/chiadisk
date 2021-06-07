@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import subprocess
 import re
 
@@ -16,6 +17,8 @@ class DiskMounter(ABC):
     def __init__(self, config: Config):
         self._config = config
         self._disk = Disk
+        self._fstab = Path('/etc/fstab')
+        self._backup_fstab()
 
     def mount(self, disk: Disk):
         self._disk = disk
@@ -37,8 +40,7 @@ class DiskMounter(ABC):
             logging.debug(f"Creating mount point: {self._disk.mount}")
 
     def _update_fstab(self) -> bool:
-        fp = Path("/etc/fstab")
-        has_duplicates = self._check_fstab_duplicates(fp)
+        has_duplicates = self._check_fstab_duplicates()
 
         if not has_duplicates:
 
@@ -53,13 +55,17 @@ class DiskMounter(ABC):
             )
 
             if os.getuid() == 0:
-                with fp.open('a', encoding='utf-8') as f:
+                with self._fstab.open('a', encoding='utf-8') as f:
                     f.write(fstr)
                 logging.debug(f'Updated /etc/fstab for partition {self._disk.partition}')
             else:
                 logging.info('/etc/fstab could not be updated due to permission errors. '
                              'Please paste the lines below in the /etc/fstab file:')
                 logging.info(fstr)
+
+            return True
+
+        return False
 
     def _mount_disk(self) -> bool:
         try:
@@ -73,8 +79,12 @@ class DiskMounter(ABC):
 
         return False
 
-    def _check_fstab_duplicates(self, fp: Path) -> bool:
-        txt = fp.read_text(encoding='utf-8')
+    def _backup_fstab(self):
+        backup = self._fstab / '.bak'
+        shutil.copy(self._fstab, backup)
+
+    def _check_fstab_duplicates(self) -> bool:
+        txt = self._fstab.read_text(encoding='utf-8')
         res = False
 
         if re.search(str(self._disk.mount), txt):
