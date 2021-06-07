@@ -80,7 +80,7 @@ class DiskMounter(ABC):
         return False
 
     def _backup_fstab(self):
-        backup = self._fstab / '.bak'
+        backup = self._fstab.with_suffix('.bak')
         shutil.copy(self._fstab, backup)
 
     def _check_fstab_duplicates(self) -> bool:
