@@ -28,6 +28,9 @@ class DiskFormatter(ABC):
             if not mkfs_result:
                 raise DiskError(f"Could not create filesystem ({self._disk.format}) for {disk.partition}")
 
+            # Update UUID and partition size
+            self._disk.update()
+
             return True
         else:
             logging.debug(f"Skipping format for disk {self._disk.device}")
@@ -60,7 +63,7 @@ class DiskFormatter(ABC):
 
     def _mkfs(self) -> bool:
         try:
-            subprocess.check_call(['sudo', f'mkft.{self._disk.format}', self._disk.partition])
+            subprocess.check_call(['sudo', f'mkfs.{self._disk.format}', '-F', self._disk.partition])
             return True
         except subprocess.CalledProcessError as e:
             logging.error(
