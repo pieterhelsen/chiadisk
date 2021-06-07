@@ -5,7 +5,6 @@ import shutil
 import subprocess
 
 from abc import ABC
-from enum import Enum
 from pathlib import Path
 from subprocess import CompletedProcess
 from tempfile import NamedTemporaryFile
@@ -29,18 +28,25 @@ class Disk(ABC):
         self._uuid = disk['uuid']
         self._model = disk['model']
         self._size = (0, 0, 0)
+        self._changed = False
+
+        self._set_size()
 
         if not self._sn:
             self._sn = self._get_sn()
+            self._changed = True
 
         if not self._model:
             self._model = self._get_model()
+            self._changed = True
 
         if self._partition.exists():
             self._uuid = self._get_uuid()
+            self._changed = True
             logging.debug(f'Partition exists. Set UUID to {self._uuid}')
 
-        self._set_size()
+        if self._changed:
+            self._commit()
 
     @staticmethod
     def _bool(clear: str) -> bool:
@@ -153,9 +159,11 @@ class Disk(ABC):
     def _set_size(self) -> Tuple[int, int, int]:
         if self._partition.exists():
             self._size = shutil.disk_usage(self._partition)
+            logging.debug(f'Found partition {self._partition} with {self._size} bytes')
         else:
             self._size = shutil.disk_usage(self._device)
 
+        self._changed = True
         return self._size
 
     def update(self, commit: bool):
