@@ -29,7 +29,7 @@ class DiskFormatter(ABC):
                 raise DiskError(f"Could not create filesystem ({self._disk.format}) for {disk.partition}")
 
             # Update clear property so disk won't be overwritten on the next run
-            self._disk.clear = "N"
+            self._disk.clear = False
 
             # Update UUID and partition size
             self._disk.update(commit=True)

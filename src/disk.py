@@ -74,10 +74,14 @@ class Disk(ABC):
             for row in reader:
                 if row['device'] == str(self._device):
                     logging.debug(f'Updating entry in {str(self._list)}: {str(self._device)}')
-                    row['clear'] = self._clear
                     row['sn'] = self._sn
                     row['model'] = self._model
                     row['uuid'] = self._uuid
+
+                    if self._clear:
+                        row['clear'] = 'Y'
+                    else:
+                        row['clear'] = 'N'
 
                 updated_row = {
                     'device': row['device'],
@@ -190,9 +194,8 @@ class Disk(ABC):
         return self._clear
 
     @clear.setter
-    def clear(self, value: str):
-        if value.lower() in ('y', 'yes', 'n', 'no'):
-            self._clear = value
+    def clear(self, value: bool):
+        self._clear = value
 
     @property
     def format(self) -> str:
