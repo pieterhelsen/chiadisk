@@ -52,6 +52,7 @@ class DiskMounter(ABC):
                 "\n"
                 f"# {self._disk.model} - {pretty_total}\n"
                 f"UUID={self._disk.uuid}\t{self._disk.mount}\t{self._disk.format}\t{defaults}"
+                "\n"
             )
 
             if os.getuid() == 0:
@@ -75,7 +76,7 @@ class DiskMounter(ABC):
             logging.error(
                 f"Could not mount partition ({self._disk.partition}) - returncode: {e.returncode}"
             )
-            logging.debug(f"Error: {e.stderr}")
+            logging.debug(f"Error: {e.stdout}")
 
         return False
 
