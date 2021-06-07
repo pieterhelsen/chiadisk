@@ -61,7 +61,10 @@ class Disk(ABC):
         with open(self._list, 'r', encoding='utf-8', newline='') as disklist, tmplist:
             reader = csv.DictReader(disklist, delimiter=";")
             names = reader.fieldnames
+
+            # write reader contents to temporary file
             writer = csv.DictWriter(tmplist, fieldnames=names, delimiter=';')
+            writer.writeheader()
             for row in reader:
                 if row['device'] == str(self._device):
                     logging.debug(f'Updating entry in {str(self._list)}: {str(self._device)}')
@@ -82,6 +85,7 @@ class Disk(ABC):
 
                 writer.writerow(updated_row)
 
+        # overwrite existing file with updated file
         shutil.move(tmplist.name, disklist.name)
 
     def set_partition(self, partition_id: int):
