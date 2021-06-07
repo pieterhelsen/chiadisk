@@ -31,16 +31,16 @@ class Disk(ABC):
         self._size = (0, 0, 0)
 
         if not self._sn:
-            self._sn = self.set_sn()
+            self._sn = self._get_sn()
 
         if not self._model:
-            self._model = self.set_model()
+            self._model = self._get_model()
 
         if self._partition.exists():
-            self._uuid = self.set_uuid()
+            self._uuid = self._get_uuid()
             logging.debug(f'Partition exists. Set UUID to {self._uuid}')
 
-        self.set_size()
+        self._set_size()
 
     @staticmethod
     def _bool(clear: str) -> bool:
@@ -88,11 +88,7 @@ class Disk(ABC):
         # overwrite existing file with updated file
         shutil.move(tmplist.name, disklist.name)
 
-    def set_partition(self, partition_id: int):
-        self._partition = f"{self.device}{str(partition_id)}"
-        return self._partition
-
-    def set_uuid(self) -> str:
+    def _get_uuid(self) -> str:
         uuid = "unknown"
 
         try:
@@ -112,7 +108,7 @@ class Disk(ABC):
 
         return uuid
 
-    def set_sn(self) -> str:
+    def _get_sn(self) -> str:
         sn = "unknown"
 
         try:
@@ -133,7 +129,7 @@ class Disk(ABC):
 
         return sn
 
-    def set_model(self) -> str:
+    def _get_model(self) -> str:
         model = "unknown"
 
         try:
@@ -154,7 +150,7 @@ class Disk(ABC):
 
         return model
 
-    def set_size(self) -> Tuple[int, int, int]:
+    def _set_size(self) -> Tuple[int, int, int]:
         if self._partition.exists():
             self._size = shutil.disk_usage(self._partition)
         else:
@@ -163,8 +159,8 @@ class Disk(ABC):
         return self._size
 
     def update(self, commit: bool):
-        self.set_size()
-        self.set_uuid()
+        self._set_size()
+        self._get_uuid()
 
         if commit:
             self._commit()
