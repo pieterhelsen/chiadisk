@@ -51,7 +51,7 @@ class DiskMounter(ABC):
             fstr = (
                 "\n"
                 f"# {self._disk.model} - {pretty_total}\n"
-                f"UUID={self._disk.uuid}\t{self._disk.mount}\t{self._disk.format}\t{defaults}"
+                f"UUID=\"{self._disk.uuid}\"\t{self._disk.mount}\t{self._disk.format}\t{defaults}"
                 "\n"
             )
 
@@ -86,16 +86,15 @@ class DiskMounter(ABC):
 
     def _check_fstab_duplicates(self) -> bool:
         txt = self._fstab.read_text(encoding='utf-8')
-        res = False
 
         if re.search(str(self._disk.mount), txt):
             logging.debug(f"Found mount point duplicate in /etc/fstab ({self._disk.mount}). Skipping...")
-            res = True
+            return True
 
         if re.search(str(self._disk.uuid), txt):
             logging.debug(f"Found UUID duplicate in /etc/fstab ({self._disk.uuid}). Skipping...")
-            res = True
+            return True
 
-        return res
+        return False
 
 
