@@ -31,6 +31,6 @@ class DiskManager(ABC):
         disks = []
 
         for row in reader:
-            disks.append(Disk(row))
+            disks.append(Disk(row, disklist))
 
         return disks

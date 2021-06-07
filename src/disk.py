@@ -1,3 +1,4 @@
+import csv
 import logging
 import re
 import shutil
@@ -7,6 +8,7 @@ from abc import ABC
 from enum import Enum
 from pathlib import Path
 from subprocess import CompletedProcess
+from tempfile import NamedTemporaryFile
 from typing import Tuple
 
 
@@ -16,7 +18,8 @@ class DiskError(Exception):
 
 class Disk(ABC):
 
-    def __init__(self, disk: dict):
+    def __init__(self, disk: dict, list: Path):
+        self._list = list
         self._device = Path(disk['device'])
         self._partition = Path(f"{disk['device']}1")
         self._mount = Path(disk['mount'])
@@ -25,6 +28,7 @@ class Disk(ABC):
         self._sn = disk['sn']
         self._uuid = disk['uuid']
         self._model = disk['model']
+        self._size = (0, 0, 0)
 
         if not self._sn:
             self._sn = self.set_sn()
@@ -51,6 +55,34 @@ class Disk(ABC):
             return fmt
 
         return 'ext4'
+
+    def _commit(self):
+        tmplist = NamedTemporaryFile(mode='w', delete=False)
+        with open(self._list, 'r', encoding='utf-8', newline='') as disklist, tmplist:
+            reader = csv.DictReader(disklist, delimiter=";")
+            names = reader.fieldnames
+            writer = csv.DictWriter(tmplist, fieldnames=names, delimiter=';')
+            for row in reader:
+                if row['device'] == str(self._device):
+                    logging.debug(f'Updating entry in {str(self._list)}: {str(self._device)}')
+                    row['clear'] = self._clear
+                    row['sn'] = self._sn
+                    row['model'] = self._model
+                    row['uuid'] = self._uuid
+
+                updated_row = {
+                    'device': row['device'],
+                    'mount': row['mount'],
+                    'clear': row['clear'],
+                    'format': row['format'],
+                    'sn': row['sn'],
+                    'model': row['model'],
+                    'uuid': row['uuid'],
+                }
+
+                writer.writerow(updated_row)
+
+        shutil.move(tmplist.name, disklist.name)
 
     def set_partition(self, partition_id: int):
         self._partition = f"{self.device}{str(partition_id)}"
@@ -126,9 +158,12 @@ class Disk(ABC):
 
         return self._size
 
-    def update(self):
+    def update(self, commit: bool):
         self.set_size()
         self.set_uuid()
+
+        if commit:
+            self._commit()
 
     @property
     def device(self) -> Path:
@@ -145,6 +180,11 @@ class Disk(ABC):
     @property
     def clear(self) -> bool:
         return self._clear
+
+    @clear.setter
+    def clear(self, value: str):
+        if value.lower() in ('y', 'yes', 'n', 'no'):
+            self._clear = value
 
     @property
     def format(self) -> str:

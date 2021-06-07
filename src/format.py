@@ -28,8 +28,11 @@ class DiskFormatter(ABC):
             if not mkfs_result:
                 raise DiskError(f"Could not create filesystem ({self._disk.format}) for {disk.partition}")
 
+            # Update clear property so disk won't be overwritten on the next run
+            self._disk.clear = "N"
+
             # Update UUID and partition size
-            self._disk.update()
+            self._disk.update(commit=True)
 
             return True
         else:
