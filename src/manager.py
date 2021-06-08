@@ -17,7 +17,12 @@ class DiskManager(ABC):
         self._formatter = formatter
         self._mounter = mounter
 
+        logging.info(f"Starting Disk List readout")
+
         disks = self._get_disks()
+        logging.info("------------------------------------------------------------------------")
+        logging.info(f"Found {len(disks)} disks for processing.")
+
         for disk in disks:
             logging.info("------------------------------------------------------------------------")
             logging.info(f"Starting setup process for disk {disk.device} (mounting to {disk.mount}")
@@ -36,7 +41,5 @@ class DiskManager(ABC):
 
         for row in reader:
             disks.append(Disk(row, disklist))
-
-        logging.info(f"Found {len(disks)} disks for processing.")
 
         return disks
