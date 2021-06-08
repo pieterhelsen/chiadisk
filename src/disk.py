@@ -111,6 +111,9 @@ class Disk(ABC):
                 res = re.search(rf'^{re.escape(str(self._partition))}: UUID="(\S*)"', line)
                 if res:
                     uuid = res.group(1)
+                    logging.error(
+                        f"Found UUID for {self._partition}: {uuid}"
+                    )
 
         except subprocess.CalledProcessError as e:
             logging.error(
@@ -173,8 +176,8 @@ class Disk(ABC):
         return self._size
 
     def update(self, commit: bool):
-        self._set_size()
-        self._get_uuid()
+        self._size = self._set_size()
+        self._uuid = self._get_uuid()
 
         if commit:
             self._commit()
