@@ -29,7 +29,7 @@ class Disk(ABC):
         self._sn = disk['sn']
         self._uuid = disk['uuid']
         self._model = disk['model']
-        self._size = (0, 0, 0)
+        self._size = (0, 0, 0, 0.0)
         self._changed = False
 
         self._set_size()
@@ -162,7 +162,7 @@ class Disk(ABC):
 
         return model
 
-    def _set_size(self) -> Tuple[int, int, int]:
+    def _set_size(self) -> Tuple[int, int, int, float]:
         if self._partition.exists():
             self._size = psutil.disk_usage(self._partition)
             logging.debug(f'Found partition {self._partition} with {self._size} bytes')
@@ -216,5 +216,5 @@ class Disk(ABC):
         return self._model
 
     @property
-    def size(self) -> Tuple[int, int, int]:
+    def size(self) -> Tuple[int, int, int, float]:
         return self._size

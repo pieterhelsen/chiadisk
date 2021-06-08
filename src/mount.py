@@ -46,7 +46,7 @@ class DiskMounter(ABC):
 
         if not has_duplicates:
 
-            total, used, free = self._disk.size
+            total, used, free, percent = self._disk.size
             pretty_total = size(total, system=alternative)
             defaults = "defaults,auto,users,rw,nofail,noatime 0 0"
 
