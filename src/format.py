@@ -2,6 +2,8 @@ import logging
 import subprocess
 
 from abc import ABC
+from time import sleep
+
 from src.config import Config
 from src.disk import Disk, DiskError
 
@@ -30,6 +32,9 @@ class DiskFormatter(ABC):
 
             # Update clear property so disk won't be overwritten on the next run
             self._disk.clear = False
+
+            # Waiting for UUID to propagate
+            sleep(2)
 
             # Update UUID and partition size
             self._disk.update(commit=True)

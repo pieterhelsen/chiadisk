@@ -10,6 +10,8 @@ from subprocess import CompletedProcess
 from tempfile import NamedTemporaryFile
 from typing import Tuple
 
+import psutil
+
 
 class DiskError(Exception):
     pass
@@ -162,7 +164,7 @@ class Disk(ABC):
 
     def _set_size(self) -> Tuple[int, int, int]:
         if self._partition.exists():
-            self._size = shutil.disk_usage(self._partition)
+            self._size = psutil.disk_usage(self._partition)
             logging.debug(f'Found partition {self._partition} with {self._size} bytes')
         else:
             self._size = shutil.disk_usage(self._device)

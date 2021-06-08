@@ -1,3 +1,4 @@
 PyYAML==5.4
 retry==0.9.2
 hurry.filesize==0.9
+psutil==5.8.0
