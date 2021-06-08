@@ -1,4 +1,5 @@
 import csv
+import logging
 from abc import ABC
 from pathlib import Path
 from typing import List
@@ -18,6 +19,9 @@ class DiskManager(ABC):
 
         disks = self._get_disks()
         for disk in disks:
+            logging.info("------------------------------------------------------------------------")
+            logging.info(f"Starting setup process for disk {disk.device} (mounting to {disk.mount}")
+
             # format disk
             self._formatter.format(disk)
 
@@ -32,5 +36,7 @@ class DiskManager(ABC):
 
         for row in reader:
             disks.append(Disk(row, disklist))
+
+        logging.info(f"Found {len(disks)} disks for processing.")
 
         return disks

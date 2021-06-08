@@ -37,7 +37,9 @@ class DiskMounter(ABC):
         # skip if the directory exists
         if not self._disk.mount.exists():
             self._disk.mount.mkdir(parents=True)
-            logging.debug(f"Creating mount point: {self._disk.mount}")
+            logging.info(f"Creating mount point: {self._disk.mount}")
+        else:
+            logging.debug(f"Mount point exists: {self._disk.mount}")
 
     def _update_fstab(self) -> bool:
         has_duplicates = self._check_fstab_duplicates()
@@ -71,6 +73,7 @@ class DiskMounter(ABC):
     def _mount_disk(self) -> bool:
         try:
             subprocess.check_call(['sudo', 'mount', '-v', self._disk.mount])
+            logging.info(f"Mounted {self._disk.partition} to {self._disk.mount}")
             return True
         except subprocess.CalledProcessError as e:
             logging.error(

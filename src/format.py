@@ -43,6 +43,7 @@ class DiskFormatter(ABC):
     def _mklabel(self) -> bool:
         try:
             subprocess.check_call(['sudo', 'parted', '-s', self._disk.device, 'mklabel', 'gpt'])
+            logging.info(f"Creating label for {self._disk.device}: gpt")
             return True
         except subprocess.CalledProcessError as e:
             logging.error(f"Could not create label for {self._disk.device} - returncode: {e.returncode}")
@@ -54,6 +55,7 @@ class DiskFormatter(ABC):
         try:
             subprocess.check_call(['sudo', 'parted', '-s', self._disk.device, 'mkpart', 'primary',
                                    str(self._disk.format).lower(), '0%', '100%'])
+            logging.info(f"Creating partition for {self._disk.device}: {self._disk.format}")
             return True
         except subprocess.CalledProcessError as e:
             logging.error(
@@ -67,6 +69,7 @@ class DiskFormatter(ABC):
     def _mkfs(self) -> bool:
         try:
             subprocess.check_call(['sudo', f'mkfs.{self._disk.format}', '-F', self._disk.partition])
+            logging.info(f"Starting filesystem format for {self._disk.partition}")
             return True
         except subprocess.CalledProcessError as e:
             logging.error(
