@@ -32,6 +32,9 @@ class DiskMounter(ABC):
         # mount drive
         self._mount_disk()
 
+        # add to chia
+        self._add_disk()
+
     def _create_dir(self):
         # create partition folder, including parents
         # skip if the directory exists
@@ -78,6 +81,19 @@ class DiskMounter(ABC):
         except subprocess.CalledProcessError as e:
             logging.error(
                 f"Could not mount partition ({self._disk.partition}) - returncode: {e.returncode}"
+            )
+
+        return False
+
+    def _add_disk(self) -> bool:
+        chia = Path(self._config.get_disk_config().get("chiapath")) / 'venv/bin/chia'
+        try:
+            subprocess.check_call([chia, 'plots', 'add', '-d', self._disk.mount])
+            logging.info(f"Added {self._disk.mount} to chia plots")
+            return True
+        except subprocess.CalledProcessError as e:
+            logging.error(
+                f"Could not add mount ({self._disk.mount}) to chia - returncode: {e.returncode}"
             )
 
         return False
