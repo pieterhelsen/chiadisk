@@ -86,7 +86,7 @@ class DiskMounter(ABC):
         return False
 
     def _add_disk(self) -> bool:
-        chia = Path(self._config.get_disk_config().get("chiapath")) / 'venv/bin/chia'
+        chia = Path(self._config.get_disk_config().get("chiapath", default='~/chia-blockchain')) / 'venv/bin/chia'
         try:
             subprocess.check_call([chia, 'plots', 'add', '-d', self._disk.mount])
             logging.info(f"Added {self._disk.mount} to chia plots")
