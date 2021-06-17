@@ -16,7 +16,6 @@ class DiskMounter(ABC):
 
     def __init__(self, config: Config):
         self._config = config
-        self._disk = Disk
         self._fstab = Path('/etc/fstab')
         self._backup_fstab()
 
@@ -33,7 +32,7 @@ class DiskMounter(ABC):
         self._mount_disk()
 
         # add to chia
-        self._add_disk()
+        self._add_chia_disk()
 
     def _create_dir(self):
         # create partition folder, including parents
@@ -49,7 +48,7 @@ class DiskMounter(ABC):
 
         if not has_duplicates:
 
-            total, used, free, percent = self._disk.size
+            total, used, free = self._disk.size
             pretty_total = size(total, system=alternative)
             defaults = "defaults,auto,users,rw,nofail,noatime 0 0"
 
@@ -85,7 +84,10 @@ class DiskMounter(ABC):
 
         return False
 
-    def _add_disk(self) -> bool:
+    def _add_chia_disk(self) -> bool:
+        if self._find_chia_disk(self._disk.mount):
+            return False
+
         chia = Path(self._config.get_disk_config().get("chiapath", '~/chia-blockchain')) / 'venv/bin/chia'
         try:
             subprocess.check_call([chia, 'plots', 'add', '-d', self._disk.mount])
@@ -94,6 +96,27 @@ class DiskMounter(ABC):
         except subprocess.CalledProcessError as e:
             logging.error(
                 f"Could not add mount ({self._disk.mount}) to chia - returncode: {e.returncode}"
+            )
+
+        return False
+
+    def _find_chia_disk(self, mount:Path) -> bool:
+        chia = Path(self._config.get_disk_config().get("chiapath", '~/chia-blockchain')) / 'venv/bin/chia'
+        try:
+            command_args = [chia, 'plots', 'show']
+            f = subprocess.Popen(command_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = f.communicate()
+            lines = stdout.decode(encoding="utf-8").splitlines()
+
+            for line in lines:
+                if line == str(mount):
+                    logging.info(f"Mount point ({self._disk.mount}) already exists in chia plots")
+                    return True
+
+            return False
+        except subprocess.CalledProcessError as e:
+            logging.error(
+                f"Could not lookup mount point ({self._disk.mount}) in chia plots - returncode: {e.returncode}"
             )
 
         return False
