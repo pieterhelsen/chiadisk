@@ -32,7 +32,9 @@ class DiskMounter(ABC):
         self._mount_disk()
 
         # add to chia
-        self._add_chia_disk()
+        # Removed due to problem with initialization
+        # Stacktrace in commit
+        #self._add_chia_disk()
 
     def _create_dir(self):
         # create partition folder, including parents
