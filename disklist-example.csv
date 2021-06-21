@@ -1,0 +1,2 @@
+﻿device;mount;clear;format;sn;model;uuid
+/dev/sda;/mnt/chia/01;n;ext4;;;

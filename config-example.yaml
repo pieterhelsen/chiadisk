@@ -2,6 +2,4 @@ log_level: DEBUG
 
 chiadisk:
   list: disk-list.csv
-  format: ext4
-  label: gpt
   chiapath: /home/doccie/chia-blockchain
