@@ -20,10 +20,14 @@ class Disk(ABC):
     def __init__(self, disk: dict, list: Path):
         self._list = list
         self._device = Path(disk['device'])
+        self._format = self._get_format(disk['format'])
+
         self._partition = Path(f"{disk['device']}1")
+        if self._format is 'ntfs':
+            self._partition = Path(f"{disk['device']}2")
+            
         self._mount = Path(disk['mount'])
         self._clear = self._bool(disk['clear'])
-        self._format = self._get_format(disk['format'])
         self._sn = disk['sn']
         self._uuid = disk['uuid']
         self._model = disk['model']

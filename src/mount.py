@@ -52,7 +52,10 @@ class DiskMounter(ABC):
 
             total, used, free = self._disk.size
             pretty_total = size(total, system=alternative)
+
             defaults = "defaults,auto,users,rw,nofail,noatime 0 0"
+            if self._disk.format is 'ntfs':
+                defaults = "defaults 0 0"
 
             fstr = (
                 "\n"
