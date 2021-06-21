@@ -1,7 +1,11 @@
 # Chiadisk
 Disk formatter and health checker
 
-This utility is not completed yet, but will one day be responsible for the following tasks:
+## !! Warning !! this is an experimental tool. Use at your own risk.
+
+This utility is a disk manager for [Chia](https://www.chia.net/) farmers. It is by no means completed yet and a lot of 
+features will likely still be improved upon in the future. These are the
+functions that I envisioned as part of this tool:
 
 - Disk formatting (**done**)
 - Disk cataloguing (**done**)  
@@ -9,15 +13,31 @@ This utility is not completed yet, but will one day be responsible for the follo
 - Adding mounted disk to Chia (**in progress**)
 - Checking disk health (**todo**)
 
-**Note**: this utility is intended for use on Linux systems **ONLY**.
+**Note**: this tool is intended for use on Linux systems **ONLY**.
+
+# Todo
+
+The following is still on the todo list:
+
+- Improve overall code quality
+- Add `black`, `flake8` and `mypy` linters, formatters and code checkers.
+- Add unit tests
+- Add compatibility with other formats than `ext4` (such as `ntfs`)  
+- The tool currently requires you to run it as `sudo`, in the future, I hope to implement a better way for this.
+- Add additional features described above
+
 
 # Usage
+
+### Clone the repository
 
 In order to use Chiadisk, checkout the program using git:
 
 ```
-$ git clone 
+$ git clone https://github.com/pieterhelsen/chiadisk 
 ```
+
+### Create Disklist
 
 Next, copy the disklist-example.csv to a file ready for editing.
 
@@ -42,7 +62,11 @@ be interpreted as 'no, I don't want to format this disk.'
 Make sure to fill in the `device`, `mount`, `clear` and `format` columns.
 I also recommend testing the tool first with a single line. 
 
-Save the file. Now make a copy of the `config-example.yaml`
+Now save the file and move to the next step. 
+
+### Update Config
+
+Now make a copy of the `config-example.yaml`
 
 ```
 $ cp config-example.yaml config.yaml
