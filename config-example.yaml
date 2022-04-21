@@ -1,5 +1,13 @@
 log_level: DEBUG
 
-chiadisk:
+diskman:
   list: disk-list.csv
   chiapath: /home/doccie/chia-blockchain
+  mount: /mnt/chia/
+  max_mount: 99
+  interval: 60
+  harvester: 1
+
+sheet:
+  spreadsheet: "Chia - Disks"
+  worksheet: "storage"

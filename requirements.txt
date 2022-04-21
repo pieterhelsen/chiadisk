@@ -1,3 +1,4 @@
-PyYAML==5.4
+PyYAML==6.0
+gspread==5.3.2
+pandas==1.4.2
 retry==0.9.2
-hurry.filesize==0.9

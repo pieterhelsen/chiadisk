@@ -6,7 +6,6 @@ import re
 
 from abc import ABC
 from pathlib import Path
-from hurry.filesize import size, alternative
 
 from src.config import Config
 from src.disk import Disk
@@ -18,12 +17,13 @@ class DiskMounter(ABC):
         self._config = config
         self._fstab = Path('/etc/fstab')
         self._backup_fstab()
+        self._check_mount_dirs()
 
-    def mount(self, disk: Disk):
+    def check(self, disk: Disk):
         self._disk = disk
 
         # create mount dir
-        self._create_dir()
+        self._check_mount_dirs()
 
         # update fstab
         self._update_fstab()
@@ -36,14 +36,15 @@ class DiskMounter(ABC):
         # Stacktrace in commit
         #self._add_chia_disk()
 
-    def _create_dir(self):
-        # create partition folder, including parents
-        # skip if the directory exists
-        if not self._disk.mount.exists():
-            self._disk.mount.mkdir(parents=True)
-            logging.info(f"Creating mount point: {self._disk.mount}")
-        else:
-            logging.debug(f"Mount point exists: {self._disk.mount}")
+    def _check_mount_dirs(self):
+        mounts = self._config.get_mount_iter()
+        for mount in mounts:
+            if not Path(mount).exists():
+                Path(mount).mkdir(parents=True)
+                logging.info(f"Creating mount point: {mount}")
+            else:
+                logging.debug(f"Mount point exists: {mount}, stopping iteration")
+                break
 
     def _update_fstab(self) -> bool:
         has_duplicates = self._check_fstab_duplicates()
@@ -142,5 +143,3 @@ class DiskMounter(ABC):
             return True
 
         return False
-
-

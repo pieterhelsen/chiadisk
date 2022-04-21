@@ -1,11 +1,12 @@
 # std
 import logging
-import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Iterator
 
 # lib
 import yaml
+
+from src.point import MountPoint
 
 
 class Config:
@@ -29,10 +30,29 @@ class Config:
         return self._config
 
     def get_disk_config(self):
-        return self._get_child_config("chiadisk")
+        return self._get_child_config("diskman")
 
-    def get_health_config(self):
-        return self._get_child_config("health")
+    def get_base_mount(self) -> str:
+        return self._get_child_config("mount")
+
+    def get_max_mount(self) -> int:
+        return int(self._get_child_config("max_mount"))
+
+    def get_interval(self) -> int:
+        return int(self._get_child_config("interval"))
+
+    def get_spreadsheet(self) -> str:
+        return self._get_child_config("spreadsheet")
+
+    def get_worksheet(self) -> str:
+        return self._get_child_config("worksheet")
+
+    def get_harvester_id(self) -> str:
+        return self._get_child_config("harvester")
+
+    def get_mount_iter(self) -> Iterator:
+        mp = MountPoint(self.get_base_mount(), self.get_max_mount())
+        return iter(mp)
 
     def get_log_level(self):
         log_level = self._get_child_config("log_level")
